@@ -33,5 +33,5 @@ Bienvenue dans **Mario**, l'application **web admin** permettant de **gérer l'i
 
 ### 🏗️ **1. Cloner le projet**
 ```sh
-git clone https://github.com/ton-utilisateur/mario.git
+git clone https://github.com/turkishbabayaga/mario.git
 cd mario
