@@ -26,11 +26,6 @@ Bienvenue dans **Mario**, l'application **web admin** permettant de **gérer l'i
 
 ## 📷 Aperçu de l'application
 
-### 🎬 **Liste des films**
-![Liste des films](https://via.placeholder.com/800x400?text=Liste+des+films)
-
-### 🏕️ **Gestion du stock**
-![Gestion du stock](https://via.placeholder.com/800x400?text=Gestion+du+stock)
 
 ---
 
