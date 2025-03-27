@@ -4,6 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Liste des films') }}
             </h2>
+<<<<<<< HEAD
 
             <!-- Bouton Ajouter DVD placé en haut à droite -->
             <a href="{{ route('films.create') }}"
@@ -14,6 +15,19 @@
         </div>
     </x-slot>
 
+=======
+        </div>
+    </x-slot>
+
+    <!-- Conteneur fixe pour le bouton -->
+    <div class="fixed top-4 right-4 z-10">
+        <a href="{{ route('films.create') }}"
+            class="bg-gradient-to-r from-green-400 to-green-600 text-white py-3 px-6 rounded-full shadow-lg hover:from-green-500 hover:to-green-700 transform hover:scale-105 transition-all duration-300 ease-in-out">
+            <i class="fas fa-plus-circle mr-2"></i> Ajouter DVD
+        </a>
+    </div>
+
+>>>>>>> a7da741f8cccd78179be3aa76fc445a4adf643c9
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Conteneur des films -->

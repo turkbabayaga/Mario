@@ -6,7 +6,10 @@ use App\Http\Controllers\FilmController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
+<<<<<<< HEAD
 require __DIR__.'/auth.php';
+=======
+>>>>>>> a7da741f8cccd78179be3aa76fc445a4adf643c9
 Route::get('/', function () {
     return view('welcome');
 });
