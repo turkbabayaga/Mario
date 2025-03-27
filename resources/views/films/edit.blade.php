@@ -79,15 +79,6 @@
                             <input type="text" id="special_features" name="special_features" value="{{ old('special_features', $film['specialFeatures']) }}" class="w-full px-4 py-2 rounded-lg border dark:border-gray-700">
                         </div>
 
-<<<<<<< HEAD
-=======
-                        <!-- ID du réalisateur -->
-                        <div>
-                            <label for="id_director" class="block text-lg text-gray-700 dark:text-gray-300">ID du réalisateur</label>
-                            <input type="number" id="id_director" name="id_director" value="{{ old('id_director', $film['idDirector']) }}" class="w-full px-4 py-2 rounded-lg border dark:border-gray-700">
-                        </div>
-
->>>>>>> a7da741f8cccd78179be3aa76fc445a4adf643c9
                         <!-- Bouton de soumission -->
                         <div>
                             <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700">Mettre à jour</button>
