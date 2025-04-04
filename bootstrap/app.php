@@ -11,8 +11,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Alias pour le middleware CSRF
+        $middleware->alias([
+            'csrf' => \App\Http\Middleware\VerifyCsrfToken::class,
+        ]);
+    
+        // Ajouter le middleware CSRF au groupe 'web'
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\VerifyCsrfToken::class,
+        ]);
+    
+        // Rediriger les invités vers '/login' s'ils ne sont pas authentifiés
+        $middleware->redirectGuestsTo('/login');
     })
+       
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
+
