@@ -21,7 +21,7 @@ class AuthApiController extends Controller
         ]);
 
         try {
-            $response = Http::get(env('API_STAFF_BASE_URL') . '/getByEmail', [
+            $response = Http::get(env('API_STAFF_GET_BY_EMAIL'), [
                 'email' => $request->email
             ]);
 
