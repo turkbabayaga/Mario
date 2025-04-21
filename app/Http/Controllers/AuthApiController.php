@@ -28,7 +28,6 @@ class AuthApiController extends Controller
             if ($response->ok()) {
                 $staff = $response->json();
 
-                // On utilise 'pasword' à la place de 'password' car l'API a une faute de frappe, que des galères toute façon
                 if ($staff && isset($staff['pasword']) && $staff['pasword'] === $request->password) {
                     session([
                         'staff_id' => $staff['staffId'],
