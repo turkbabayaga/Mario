@@ -3,6 +3,8 @@
 use App\Http\Controllers\AuthApiController;
 use App\Http\Controllers\FilmController;
 use App\Http\Middleware\IsStaffAuthenticated;
+use App\Http\Controllers\StockController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,4 +28,7 @@ Route::middleware(IsStaffAuthenticated::class)->group(function () {
     Route::get('/films/{filmId}/edit', [FilmController::class, 'edit'])->name('films.edit');
     Route::put('/films/{filmId}', [FilmController::class, 'update'])->name('films.update');
     Route::delete('/films/{filmId}', [FilmController::class, 'destroy'])->name('films.destroy');
+
+    // Nouvelle route pour Stocks
+    Route::get('/stocks', [StockController::class, 'index'])->name('stocks.index');
 });

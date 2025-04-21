@@ -1,4 +1,3 @@
-
 <nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -15,12 +14,11 @@
                     <x-nav-link :href="route('films.index')" :active="request()->routeIs('films.index')">
                         {{ __('Films') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('films.index')" :active="request()->routeIs('films.index')">
-                        {{ __('Accueil') }}
+                    <x-nav-link :href="route('stocks.index')" :active="request()->routeIs('stocks.index')">
+                        {{ __('Stocks') }}
                     </x-nav-link>
                 </div>
             </div>
-
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
@@ -39,7 +37,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Se déconnecter') }}
                             </x-dropdown-link>
@@ -76,7 +74,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Se déconnecter') }}
                     </x-responsive-nav-link>
