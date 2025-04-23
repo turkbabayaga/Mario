@@ -9,40 +9,54 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
-        $storeId = $request->get('store_id', 1);
+        $storeId = $request->get('store_id'); // Optionnel : null = tous
 
-        // Appelle le endpoint global
         $response = Http::get(env('API_STOCK_ALL'));
 
-        if (! $response->ok()) {
+        if (!$response->ok()) {
             $error = 'Erreur API (code ' . $response->status() . ')';
-            return view('stocks.index', [
-                'stocks' => [],
-                'error'  => $error,
-            ]);
+            return view('stocks.index', ['stocks' => [], 'error' => $error]);
         }
 
-        $json = $response->json();
-        $rawStocks = $json['data'] ?? $json;
+        $inventories = $response->json();
 
-        // Filtre localement par store_id
-        $filtered = array_filter($rawStocks, function ($item) use ($storeId) {
-            return ($item['storeId'] ?? null) == $storeId;
-        });
+        // Regroupe les stocks par filmId + storeId
+        $grouped = [];
 
-        $stocks = array_map(function ($item) {
-            return [
-                'film_id'  => $item['filmId'] ?? null,
-                'store_id' => $item['storeId'] ?? null,
-                'quantity' => $item['quantity'] ?? 0,
-            ];
-        }, $filtered);
+        foreach ($inventories as $item) {
+            $filmId = $item['filmId'] ?? null;
+            $store = $item['storeId'] ?? null;
+
+            if ($filmId === null || $store === null) {
+                continue;
+            }
+
+            if ($storeId && $store != $storeId) {
+                continue;
+            }
+
+            $key = $filmId . '_' . $store;
+
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'film_id'  => $filmId,
+                    'store_id' => $store,
+                    'quantity' => 0,
+                ];
+            }
+
+            $grouped[$key]['quantity']++;
+        }
+
+        // Transforme en tableau indexé
+        $stocks = array_values($grouped);
 
         return view('stocks.index', [
             'stocks' => $stocks,
             'error'  => null,
         ]);
     }
+
     public function edit($inventoryId)
     {
         try {
