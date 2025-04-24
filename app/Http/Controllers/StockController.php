@@ -11,7 +11,6 @@ class StockController extends Controller
     {
         $storeId = $request->get('store_id');
 
-        // Appel API inventaires
         $inventoryResponse = Http::get(env('API_STOCK_ALL'));
         if (!$inventoryResponse->ok()) {
             return view('stocks.index', [
@@ -21,7 +20,6 @@ class StockController extends Controller
         }
         $inventories = $inventoryResponse->json();
 
-        // Appel API films
         $filmsResponse = Http::get(env('API_FILMS_ALL'));
         if (!$filmsResponse->ok()) {
             return view('stocks.index', [
@@ -31,14 +29,12 @@ class StockController extends Controller
         }
         $films = collect($filmsResponse->json())->keyBy('filmId');
 
-        // Construction de la liste des magasins dispo
         $storeList = collect($inventories)
             ->pluck('storeId')
             ->unique()
             ->sort()
             ->values();
 
-        // Groupement et comptage
         $grouped = [];
 
         foreach ($inventories as $item) {
@@ -64,7 +60,6 @@ class StockController extends Controller
 
         $stocks = array_values($grouped);
 
-        // On envoie storeList et selectedStoreId à la vue
         return view('stocks.index', [
             'stocks' => $stocks,
             'error' => null,
@@ -73,46 +68,51 @@ class StockController extends Controller
         ]);
     }
 
-    public function edit($inventoryId)
-    {
-        try {
-            $response = Http::get(env('API_STOCK_ALL'));
-            if ($response->ok()) {
-                $stocks = $response->json();
-                $stock = collect($stocks)->firstWhere('inventoryId', $inventoryId);
-
-                if (!$stock) {
-                    return redirect()->route('stocks.index')->with('error', 'Stock introuvable.');
-                }
-
-                return view('stocks.edit', compact('stock'));
-            } else {
-                return redirect()->route('stocks.index')->with('error', 'Erreur récupération stock.');
-            }
-        } catch (\Exception $e) {
-            return redirect()->route('stocks.index')->with('error', 'Erreur API : ' . $e->getMessage());
-        }
-    }
-
-    public function update(Request $request, $inventoryId)
+    public function change(Request $request)
     {
         $request->validate([
-            'quantity' => 'required|integer|min:0',
+            'film_id' => 'required|integer',
+            'store_id' => 'required|integer',
+            'quantity' => 'required|integer|min:1',
+            'action' => 'required|in:add,delete',
         ]);
 
-        try {
-            $response = Http::put(env('API_STOCK_UPDATE'), [
-                'id' => $inventoryId,
-                'quantity' => $request->input('quantity'),
-            ]);
+        $filmId = $request->input('film_id');
+        $storeId = $request->input('store_id');
+        $quantity = $request->input('quantity');
+        $action = $request->input('action');
 
-            if ($response->successful()) {
-                return redirect()->route('stocks.index')->with('success', 'Stock mis à jour avec succès.');
-            } else {
-                return redirect()->back()->with('error', 'Erreur lors de la mise à jour.');
+        $successCount = 0;
+
+        try {
+            for ($i = 0; $i < $quantity; $i++) {
+                if ($action === 'add') {
+                    $response = Http::post(env('API_STOCK_ADD'), [
+                        'filmId' => $filmId,
+                        'storeId' => $storeId
+                    ]);
+                } else {
+                    $all = Http::get(env('API_STOCK_ALL'))->json();
+                    $match = collect($all)
+                        ->where('filmId', $filmId)
+                        ->where('storeId', $storeId)
+                        ->first();
+
+                    if (!$match) break;
+
+                    $response = Http::delete(env('API_STOCK_DELETE'), [
+                        'id' => $match['inventoryId']
+                    ]);
+                }
+
+                if ($response->successful()) {
+                    $successCount++;
+                }
             }
+
+            return redirect()->route('stocks.index')->with('success', "$successCount exemplaire(s) ".($action === 'add' ? "ajouté(s)" : "supprimé(s)")." avec succès.");
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur API : ' . $e->getMessage());
+            return redirect()->route('stocks.index')->with('error', 'Erreur API : ' . $e->getMessage());
         }
     }
 }

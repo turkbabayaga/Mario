@@ -35,8 +35,6 @@ Route::middleware(['web', \App\Http\Middleware\IsStaffAuthenticated::class])->gr
     // Stocks
     Route::prefix('stocks')->name('stocks.')->group(function () {
         Route::get('/', [StockController::class, 'index'])->name('index');
-        Route::get('/{inventoryId}/edit', [StockController::class, 'edit'])->name('edit');
-        Route::put('/{inventoryId}', [StockController::class, 'update'])->name('update');
+        Route::post('/change', [StockController::class, 'change'])->name('change');
     });
-
 });
