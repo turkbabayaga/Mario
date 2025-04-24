@@ -9,54 +9,59 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
-        $storeId = $request->get('store_id'); // Optionnel : null = tous
+        $storeId = $request->get('store_id');
 
-        $response = Http::get(env('API_STOCK_ALL'));
-
-        if (!$response->ok()) {
-            $error = 'Erreur API (code ' . $response->status() . ')';
-            return view('stocks.index', ['stocks' => [], 'error' => $error]);
+        // Appelle API des stocks
+        $inventoryResponse = Http::get(env('API_STOCK_ALL'));
+        if (! $inventoryResponse->ok()) {
+            return view('stocks.index', [
+                'stocks' => [],
+                'error' => 'Erreur API stocks (code ' . $inventoryResponse->status() . ')'
+            ]);
         }
+        $inventories = $inventoryResponse->json();
 
-        $inventories = $response->json();
+        // Appelle API des films
+        $filmsResponse = Http::get(env('API_FILMS_ALL'));
+        if (! $filmsResponse->ok()) {
+            return view('stocks.index', [
+                'stocks' => [],
+                'error' => 'Erreur API films (code ' . $filmsResponse->status() . ')'
+            ]);
+        }
+        $films = collect($filmsResponse->json())->keyBy('filmId'); // accès rapide via filmId
 
-        // Regroupe les stocks par filmId + storeId
+        // Groupement + comptage
         $grouped = [];
 
         foreach ($inventories as $item) {
             $filmId = $item['filmId'] ?? null;
             $store = $item['storeId'] ?? null;
 
-            if ($filmId === null || $store === null) {
-                continue;
-            }
-
-            if ($storeId && $store != $storeId) {
-                continue;
-            }
+            if ($filmId === null || $store === null) continue;
+            if ($storeId && $store != $storeId) continue;
 
             $key = $filmId . '_' . $store;
 
             if (!isset($grouped[$key])) {
                 $grouped[$key] = [
-                    'film_id'  => $filmId,
+                    'film_id' => $filmId,
                     'store_id' => $store,
                     'quantity' => 0,
+                    'title' => $films[$filmId]['title'] ?? 'Inconnu',
                 ];
             }
 
             $grouped[$key]['quantity']++;
         }
 
-        // Transforme en tableau indexé
         $stocks = array_values($grouped);
 
         return view('stocks.index', [
             'stocks' => $stocks,
-            'error'  => null,
+            'error' => null,
         ]);
     }
-
     public function edit($inventoryId)
     {
         try {
