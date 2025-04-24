@@ -11,9 +11,9 @@ class StockController extends Controller
     {
         $storeId = $request->get('store_id');
 
-        // Appelle API des stocks
+        // Appel API inventaires
         $inventoryResponse = Http::get(env('API_STOCK_ALL'));
-        if (! $inventoryResponse->ok()) {
+        if (!$inventoryResponse->ok()) {
             return view('stocks.index', [
                 'stocks' => [],
                 'error' => 'Erreur API stocks (code ' . $inventoryResponse->status() . ')'
@@ -21,17 +21,24 @@ class StockController extends Controller
         }
         $inventories = $inventoryResponse->json();
 
-        // Appelle API des films
+        // Appel API films
         $filmsResponse = Http::get(env('API_FILMS_ALL'));
-        if (! $filmsResponse->ok()) {
+        if (!$filmsResponse->ok()) {
             return view('stocks.index', [
                 'stocks' => [],
                 'error' => 'Erreur API films (code ' . $filmsResponse->status() . ')'
             ]);
         }
-        $films = collect($filmsResponse->json())->keyBy('filmId'); // accès rapide via filmId
+        $films = collect($filmsResponse->json())->keyBy('filmId');
 
-        // Groupement + comptage
+        // Construction de la liste des magasins dispo
+        $storeList = collect($inventories)
+            ->pluck('storeId')
+            ->unique()
+            ->sort()
+            ->values();
+
+        // Groupement et comptage
         $grouped = [];
 
         foreach ($inventories as $item) {
@@ -57,11 +64,15 @@ class StockController extends Controller
 
         $stocks = array_values($grouped);
 
+        // On envoie storeList et selectedStoreId à la vue
         return view('stocks.index', [
             'stocks' => $stocks,
             'error' => null,
+            'storeList' => $storeList,
+            'selectedStoreId' => $storeId,
         ]);
     }
+
     public function edit($inventoryId)
     {
         try {
