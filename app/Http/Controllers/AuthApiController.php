@@ -21,7 +21,9 @@ class AuthApiController extends Controller
         ]);
 
         try {
-            $response = Http::get(env('API_STAFF_GET_BY_EMAIL'), [
+            $url = env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/staff/getByEmail';
+
+            $response = Http::post($url, [
                 'email' => $request->email
             ]);
 

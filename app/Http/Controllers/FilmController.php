@@ -14,7 +14,7 @@ class FilmController extends Controller
     public function __construct()
     {
         $this->client = new Client();
-        $this->apiBaseUrl = env('API_FILMS_BASE_URL');
+        $this->apiBaseUrl = "{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/base/url' }";
     }
 
     public function create()
@@ -39,7 +39,7 @@ class FilmController extends Controller
                 'special_features' => 'nullable|string',
             ]);
 
-            $response = $this->client->post(env('API_FILMS_ADD'), [
+            $response = $this->client->post("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/add' }", [
                 'form_params' => [
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
@@ -73,7 +73,7 @@ class FilmController extends Controller
         $search = $request->input('search');
 
         try {
-            $response = $this->client->get(env('API_FILMS_ALL'));
+            $response = $this->client->get("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/all' }");
 
             if ($response->getStatusCode() == 200) {
                 $films = json_decode($response->getBody()->getContents(), true);
@@ -94,7 +94,7 @@ class FilmController extends Controller
     public function show($filmId)
     {
         try {
-            $response = $this->client->get(env('API_FILMS_GET_BY_ID'), [
+            $response = $this->client->get("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/get/by/id' }", [
                 'query' => ['id' => $filmId]
             ]);
 
@@ -113,7 +113,7 @@ class FilmController extends Controller
     public function edit($filmId)
     {
         try {
-            $response = $this->client->get(env('API_FILMS_GET_BY_ID'), [
+            $response = $this->client->get("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/get/by/id' }", [
                 'query' => ['id' => $filmId]
             ]);
 
@@ -146,7 +146,7 @@ class FilmController extends Controller
                 'special_features' => 'nullable|string',
             ]);
 
-            $response = $this->client->put(env('API_FILMS_UPDATE') . '/' . $filmId, [
+            $response = $this->client->put("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/update' }" . '/' . $filmId, [
                 'form_params' => [
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
@@ -177,7 +177,7 @@ class FilmController extends Controller
     public function destroy($filmId)
     {
         try {
-            $response = $this->client->delete(env('API_FILMS_DELETE') . '/' . $filmId);
+            $response = $this->client->delete("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/delete' }" . '/' . $filmId);
 
             if ($response->getStatusCode() === 200) {
                 return redirect()->route('films.index')->with('success', 'Film supprimé avec succès.');

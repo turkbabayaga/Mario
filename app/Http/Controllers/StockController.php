@@ -11,7 +11,7 @@ class StockController extends Controller
     {
         $storeId = $request->get('store_id');
 
-        $inventoryResponse = Http::get(env('API_STOCK_ALL'));
+        $inventoryResponse = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/all' );
         if (!$inventoryResponse->ok()) {
             return view('stocks.index', [
                 'stocks' => [],
@@ -20,7 +20,7 @@ class StockController extends Controller
         }
         $inventories = $inventoryResponse->json();
 
-        $filmsResponse = Http::get(env('API_FILMS_ALL'));
+        $filmsResponse = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/films/all' );
         if (!$filmsResponse->ok()) {
             return view('stocks.index', [
                 'stocks' => [],
@@ -87,12 +87,12 @@ class StockController extends Controller
         try {
             for ($i = 0; $i < $quantity; $i++) {
                 if ($action === 'add') {
-                    $response = Http::post(env('API_STOCK_ADD'), [
+                    $response = Http::post(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/add' , [
                         'filmId' => $filmId,
                         'storeId' => $storeId
                     ]);
                 } else {
-                    $all = Http::get(env('API_STOCK_ALL'))->json();
+                    $all = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/all' )->json();
                     $match = collect($all)
                         ->where('filmId', $filmId)
                         ->where('storeId', $storeId)
@@ -100,7 +100,7 @@ class StockController extends Controller
 
                     if (!$match) break;
 
-                    $response = Http::delete(env('API_STOCK_DELETE'), [
+                    $response = Http::delete(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/delete' , [
                         'id' => $match['inventoryId']
                     ]);
                 }
