@@ -6,15 +6,19 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 
-class FilmController extends Controller
-{
+class FilmController extends Controller {
     protected $client;
-    protected $apiBaseUrl;
 
     public function __construct()
     {
         $this->client = new Client();
-        $this->apiBaseUrl = "{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/base/url' }";
+    }
+
+    protected function buildApiUrl(string $path): string
+    {
+        $base = rtrim(env('TOAD_SERVER'), '/');
+        $port = env('TOAD_PORT');
+        return "http://{$base}:{$port}/" . ltrim($path, '/');
     }
 
     public function create()
@@ -39,7 +43,7 @@ class FilmController extends Controller
                 'special_features' => 'nullable|string',
             ]);
 
-            $response = $this->client->post("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/add' }", [
+            $response = $this->client->post($this->buildApiUrl('toad/film/add'), [
                 'form_params' => [
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
@@ -59,7 +63,7 @@ class FilmController extends Controller
             if ($response->getStatusCode() === 200) {
                 return redirect()->route('films.index')->with('success', 'Film ajouté avec succès.');
             } else {
-                return redirect()->back()->with('error', 'Erreur lors de l\'ajout du film.');
+                return redirect()->back()->with('error', 'Erreur lors de ajout du film.');
             }
         } catch (\Exception $e) {
             Log::error("Erreur films.store : " . $e->getMessage());
@@ -73,7 +77,7 @@ class FilmController extends Controller
         $search = $request->input('search');
 
         try {
-            $response = $this->client->get("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/all' }");
+            $response = $this->client->get($this->buildApiUrl('toad/film/all'));
 
             if ($response->getStatusCode() == 200) {
                 $films = json_decode($response->getBody()->getContents(), true);
@@ -94,7 +98,7 @@ class FilmController extends Controller
     public function show($filmId)
     {
         try {
-            $response = $this->client->get("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/get/by/id' }", [
+            $response = $this->client->get($this->buildApiUrl('toad/film/get/by/id'), [
                 'query' => ['id' => $filmId]
             ]);
 
@@ -113,7 +117,7 @@ class FilmController extends Controller
     public function edit($filmId)
     {
         try {
-            $response = $this->client->get("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/get/by/id' }", [
+            $response = $this->client->get($this->buildApiUrl('toad/film/get/by/id'), [
                 'query' => ['id' => $filmId]
             ]);
 
@@ -146,7 +150,7 @@ class FilmController extends Controller
                 'special_features' => 'nullable|string',
             ]);
 
-            $response = $this->client->put("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/update' }" . '/' . $filmId, [
+            $response = $this->client->put($this->buildApiUrl("toad/film/update/{$filmId}"), [
                 'form_params' => [
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
@@ -177,7 +181,7 @@ class FilmController extends Controller
     public function destroy($filmId)
     {
         try {
-            $response = $this->client->delete("{ env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/delete' }" . '/' . $filmId);
+            $response = $this->client->delete($this->buildApiUrl("toad/film/delete/{$filmId}"));
 
             if ($response->getStatusCode() === 200) {
                 return redirect()->route('films.index')->with('success', 'Film supprimé avec succès.');

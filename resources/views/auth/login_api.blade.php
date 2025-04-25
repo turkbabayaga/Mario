@@ -1,35 +1,37 @@
 <x-guest-layout>
-    <!-- Affichage des messages de succès -->
+
+    <!-- ✅ Message de succès -->
     @if(session('success'))
-        <div class="mb-4 text-green-600 font-semibold text-center">
+        <div class="mb-4 p-3 bg-green-100 text-green-800 font-semibold text-center rounded">
             {{ session('success') }}
         </div>
     @endif
 
-    <!-- Affichage des messages d'erreur -->
+    <!-- ❌ Message d'erreur API générique -->
     @if(session('error'))
-        <div class="mb-4 text-red-600 font-semibold text-center">
+        <div class="mb-4 p-3 bg-red-100 text-red-800 font-semibold text-center rounded">
             {{ session('error') }}
         </div>
     @endif
 
-    <!-- Erreurs de validation -->
+    <!-- ❌ Erreurs de validation Laravel -->
     @if($errors->any())
-        <div class="mb-4 text-red-600 font-semibold text-center">
+        <div class="mb-4 p-3 bg-red-100 text-red-800 font-semibold text-center rounded">
             {{ $errors->first() }}
         </div>
     @endif
 
-    <form method="POST" action="{{ route('login.api') }}" class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
+    <form method="POST" action="{{ route('login.api') }}"
+          class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-lg">
         @csrf
 
-        <h2 class="text-center text-white text-xl font-bold mb-6">Connexion au panel Mario</h2>
+        <h2 class="text-center text-white text-2xl font-bold mb-6">Connexion au panel Mario</h2>
 
-        <!-- Email Address -->
+        <!-- Email -->
         <div class="mb-4">
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email"
-                          :value="old('email')" required autofocus autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full"
+                          type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -41,15 +43,17 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
+        <!-- Remember me -->
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                <input id="remember_me" type="checkbox"
+                       class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800"
+                       name="remember">
                 <span class="ms-2 text-sm text-gray-300">{{ __('Se souvenir de moi') }}</span>
             </label>
         </div>
 
-        <!-- Bouton -->
+        <!-- Submit -->
         <div class="flex justify-center mt-6">
             <x-primary-button class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md shadow-md">
                 {{ __('Se connecter') }}
