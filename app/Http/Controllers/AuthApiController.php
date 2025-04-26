@@ -6,41 +6,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use GuzzleHttp\Client;
 
-class AuthApiController extends Controller {
-    protected function buildApiUrl(string $path): string
-    {
-        $base = rtrim(env('TOAD_SERVER'), '/');
-        $port = env('TOAD_PORT');
-        return "http://{$base}:{$port}/" . ltrim($path, '/');
-    }
-
-    /**
-     * Affiche le formulaire de connexion.
-     */
+class AuthApiController extends Controller
+{
     public function showLoginForm()
     {
         return view('auth.login_api');
     }
 
-    /**
-     * Connexion via l'API externe.
-     */
     public function login(Request $request)
     {
-        $client = new Client();
+        $client = new \GuzzleHttp\Client();
 
         $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $serveur = env('TOAD_SERVER');
+        $serveur = rtrim(env('TOAD_SERVER'), '/');
         $port = env('TOAD_PORT');
-
-        if (!is_numeric($port) || $port < 1 || $port > 65535) {
-            return back()->with('error', 'Port invalide dans le .env');
-        }
-
         $email = $request->input('email');
         $password = $request->input('password');
 
@@ -58,15 +41,14 @@ class AuthApiController extends Controller {
                 return back()->with('error', 'Mot de passe incorrect.');
             }
 
-            // Stockage session
             session([
-                'staff_id'      => $staff['staffId'],
-                'first_name'    => $staff['firstName'],
-                'last_name'     => $staff['lastName'],
-                'email'         => $staff['email'],
-                'store_id'      => $staff['storeId'],
-                'role_id'       => $staff['roleId'],
-                'is_logged_in'  => true,
+                'staff_id' => $staff['staffId'],
+                'first_name' => $staff['firstName'],
+                'last_name' => $staff['lastName'],
+                'email' => $staff['email'],
+                'store_id' => $staff['storeId'],
+                'role_id' => $staff['roleId'],
+                'is_logged_in' => true,
             ]);
 
             return redirect()->route('films.index')->with('success', 'Connexion réussie.');
@@ -75,12 +57,9 @@ class AuthApiController extends Controller {
         }
     }
 
-    /**
-     * Déconnexion.
-     */
     public function logout()
     {
         Session::flush();
-        return redirect()->route('login')->with('success', 'Déconnecté avec succès.');
+        return redirect()->route('login')->with('success', 'Déconnecté.');
     }
 }

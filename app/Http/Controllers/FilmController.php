@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 
-class FilmController extends Controller {
+class FilmController extends Controller
+{
     protected $client;
 
     public function __construct()
@@ -16,9 +17,34 @@ class FilmController extends Controller {
 
     protected function buildApiUrl(string $path): string
     {
-        $base = rtrim(env('TOAD_SERVER'), '/');
+        $server = rtrim(env('TOAD_SERVER'), '/');
         $port = env('TOAD_PORT');
-        return "http://{$base}:{$port}/" . ltrim($path, '/');
+        return "http://{$server}:{$port}/" . ltrim($path, '/');
+    }
+
+    public function index(Request $request)
+    {
+        $films = [];
+        $search = $request->input('search');
+
+        try {
+            $url = $this->buildApiUrl('toad/film/all');
+            $response = $this->client->get($url);
+
+            if ($response->getStatusCode() === 200) {
+                $films = json_decode($response->getBody()->getContents(), true);
+                if ($search) {
+                    $films = array_filter($films, fn($film) => stripos($film['title'], $search) !== false);
+                }
+            } else {
+                return redirect()->back()->with('error', 'Erreur lors de la récupération des films.');
+            }
+        } catch (\Exception $e) {
+            Log::error('Erreur films.index : ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Erreur appel API : ' . $e->getMessage());
+        }
+
+        return view('films.index', compact('films'));
     }
 
     public function create()
@@ -43,7 +69,8 @@ class FilmController extends Controller {
                 'special_features' => 'nullable|string',
             ]);
 
-            $response = $this->client->post($this->buildApiUrl('toad/film/add'), [
+            $url = $this->buildApiUrl('toad/film/add');
+            $response = $this->client->post($url, [
                 'form_params' => [
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
@@ -63,53 +90,28 @@ class FilmController extends Controller {
             if ($response->getStatusCode() === 200) {
                 return redirect()->route('films.index')->with('success', 'Film ajouté avec succès.');
             } else {
-                return redirect()->back()->with('error', 'Erreur lors de ajout du film.');
+                return redirect()->back()->with('error', 'Erreur lors de l\'ajout du film.');
             }
         } catch (\Exception $e) {
-            Log::error("Erreur films.store : " . $e->getMessage());
+            Log::error('Erreur films.store : ' . $e->getMessage());
             return redirect()->back()->with('error', 'Erreur API : ' . $e->getMessage());
         }
-    }
-
-    public function index(Request $request)
-    {
-        $films = [];
-        $search = $request->input('search');
-
-        try {
-            $response = $this->client->get($this->buildApiUrl('toad/film/all'));
-
-            if ($response->getStatusCode() == 200) {
-                $films = json_decode($response->getBody()->getContents(), true);
-                if ($search) {
-                    $films = array_filter($films, fn($film) => stripos($film['title'], $search) !== false);
-                }
-            } else {
-                return redirect()->back()->with('error', 'Erreur lors de la récupération des films.');
-            }
-        } catch (\Exception $e) {
-            Log::error('Erreur films.index : ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Erreur appel API : ' . $e->getMessage());
-        }
-
-        return view('films.index', compact('films'));
     }
 
     public function show($filmId)
     {
         try {
-            $response = $this->client->get($this->buildApiUrl('toad/film/get/by/id'), [
-                'query' => ['id' => $filmId]
-            ]);
+            $url = $this->buildApiUrl('toad/film/getById?id=' . $filmId);
+            $response = $this->client->get($url);
 
-            if ($response->getStatusCode() == 200) {
+            if ($response->getStatusCode() === 200) {
                 $film = json_decode($response->getBody()->getContents(), true);
                 return view('films.show', compact('film'));
             } else {
                 return redirect()->back()->with('error', 'Film non trouvé.');
             }
         } catch (\Exception $e) {
-            Log::error("Erreur films.show : " . $e->getMessage());
+            Log::error('Erreur films.show : ' . $e->getMessage());
             return redirect()->back()->with('error', 'Erreur API : ' . $e->getMessage());
         }
     }
@@ -117,18 +119,17 @@ class FilmController extends Controller {
     public function edit($filmId)
     {
         try {
-            $response = $this->client->get($this->buildApiUrl('toad/film/get/by/id'), [
-                'query' => ['id' => $filmId]
-            ]);
+            $url = $this->buildApiUrl('toad/film/getById?id=' . $filmId);
+            $response = $this->client->get($url);
 
-            if ($response->getStatusCode() == 200) {
+            if ($response->getStatusCode() === 200) {
                 $film = json_decode($response->getBody()->getContents(), true);
                 return view('films.edit', compact('film'));
             } else {
                 return redirect()->back()->with('error', 'Film non trouvé.');
             }
         } catch (\Exception $e) {
-            Log::error("Erreur films.edit : " . $e->getMessage());
+            Log::error('Erreur films.edit : ' . $e->getMessage());
             return redirect()->back()->with('error', 'Erreur API : ' . $e->getMessage());
         }
     }
@@ -150,7 +151,8 @@ class FilmController extends Controller {
                 'special_features' => 'nullable|string',
             ]);
 
-            $response = $this->client->put($this->buildApiUrl("toad/film/update/{$filmId}"), [
+            $url = $this->buildApiUrl('toad/film/update/' . $filmId);
+            $response = $this->client->put($url, [
                 'form_params' => [
                     'title' => $validatedData['title'],
                     'description' => $validatedData['description'],
@@ -173,7 +175,7 @@ class FilmController extends Controller {
                 return redirect()->back()->with('error', 'Erreur lors de la mise à jour du film.');
             }
         } catch (\Exception $e) {
-            Log::error("Erreur films.update : " . $e->getMessage());
+            Log::error('Erreur films.update : ' . $e->getMessage());
             return redirect()->back()->with('error', 'Erreur API : ' . $e->getMessage());
         }
     }
@@ -181,7 +183,8 @@ class FilmController extends Controller {
     public function destroy($filmId)
     {
         try {
-            $response = $this->client->delete($this->buildApiUrl("toad/film/delete/{$filmId}"));
+            $url = $this->buildApiUrl('toad/film/delete/' . $filmId);
+            $response = $this->client->delete($url);
 
             if ($response->getStatusCode() === 200) {
                 return redirect()->route('films.index')->with('success', 'Film supprimé avec succès.');
@@ -189,7 +192,7 @@ class FilmController extends Controller {
                 return redirect()->back()->with('error', 'Erreur lors de la suppression du film.');
             }
         } catch (\Exception $e) {
-            Log::error("Erreur films.destroy : " . $e->getMessage());
+            Log::error('Erreur films.destroy : ' . $e->getMessage());
             return redirect()->back()->with('error', 'Erreur API : ' . $e->getMessage());
         }
     }
