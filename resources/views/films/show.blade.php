@@ -1,131 +1,79 @@
 <x-app-layout>
-    <div class="relative h-screen bg-gradient-to-b from-gray-900 to-gray-800 overflow-hidden">
-        <!-- En-tête avec titre du film -->
-        <div class="pt-16 pb-8 px-4">
-            <h1 class="text-4xl font-bold tracking-tight text-center text-white">
-                {{ $film['title'] ?? 'Détails du film' }}
-            </h1>
-        </div>
+    <x-slot name="header">
+        <h2 class="font-semibold text-4xl text-center text-gray-200 leading-tight">
+            {{ __('Détails du Film') }}
+        </h2>
+    </x-slot>
 
-        <!-- Container principal -->
-        <div class="max-w-5xl mx-auto px-4">
-            <!-- Badges d'informations clés avec style moderne -->
-            <div class="flex justify-center mb-12 gap-8">
-                @if(isset($film['releaseYear']))
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mb-2">
-                        <span class="text-xl font-bold text-white">{{ $film['releaseYear'] }}</span>
-                    </div>
-                    <span class="text-gray-300 text-sm">Année</span>
-                </div>
-                @endif
+    <div class="py-12 bg-gray-900 min-h-screen">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-gray-800 shadow-lg rounded-lg p-10">
 
-                @if(isset($film['rating']))
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-purple-500 flex items-center justify-center mb-2">
-                        <span class="text-xl font-bold text-white">{{ $film['rating'] }}</span>
-                    </div>
-                    <span class="text-gray-300 text-sm">Rating</span>
-                </div>
-                @endif
+                @if(isset($film) && is_array($film))
+                    <!-- Titre du Film -->
+                    <h1 class="text-3xl font-bold text-white text-center mb-10 tracking-wide uppercase">
+                        {{ $film['title'] ?? 'Titre non disponible' }}
+                    </h1>
 
-                @if(isset($film['length']))
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center mb-2">
-                        <span class="text-xl font-bold text-white">{{ $film['length'] }}</span>
-                    </div>
-                    <span class="text-gray-300 text-sm">Minutes</span>
-                </div>
-                @endif
-
-                @if(isset($film['languageId']))
-                <div class="flex flex-col items-center">
-                    <div class="w-16 h-16 rounded-full bg-amber-500 flex items-center justify-center mb-2">
+                    <!-- Informations principales sous forme de cartes -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @php
-                            $languages = [
-                                1 => 'EN',
-                                2 => 'IT',
-                                3 => 'JP',
-                                4 => 'CN',
-                                5 => 'FR',
-                                6 => 'DE',
-                                7 => 'ES'
+                            $details = [
+                                'Langue' => $film['languageId'] ?? 'Non spécifiée',
+                                'Année de sortie' => $film['releaseYear'] ?? 'Non spécifiée',
+                                'Durée' => ($film['length'] ?? 'Non spécifiée') . ' minutes',
+                                'Note' => $film['rating'] ?? 'Non spécifiée',
+                                'Tarif de location' => ($film['rentalRate'] ?? 'Non spécifié') . ' €',
+                                'Durée location' => ($film['rentalDuration'] ?? 'Non spécifiée') . ' jours',
+                                'Coût de remplacement' => ($film['replacementCost'] ?? 'Non spécifié') . ' €',
+                                'Caractéristiques' => $film['specialFeatures'] ?? 'Non spécifiées',
                             ];
                         @endphp
-                        <span class="text-xl font-bold text-white">{{ $languages[$film['languageId'] ?? 0] ?? '' }}</span>
+
+                        @foreach($details as $label => $value)
+                            <div class="bg-gray-700 p-6 rounded-lg shadow hover:shadow-xl transition">
+                                <p class="text-lg text-gray-300"><span class="font-bold">{{ $label }} :</span> {{ $value }}</p>
+                            </div>
+                        @endforeach
                     </div>
-                    <span class="text-gray-300 text-sm">Langue</span>
-                </div>
+
+                    <!-- Description spéciale en bas -->
+                    <div class="mt-10">
+                        <div class="bg-gray-700 p-6 rounded-lg shadow hover:shadow-xl transition">
+                            <h3 class="text-2xl font-bold text-white mb-4">Description :</h3>
+                            <p class="text-gray-300 leading-relaxed">
+                                {{ $film['description'] ?? 'Description non disponible' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Boutons Modifier / Supprimer / Retour -->
+                    <div class="flex flex-wrap justify-center gap-6 mt-10">
+                        <a href="{{ route('films.edit', ['filmId' => $film['filmId']]) }}"
+                           class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md border border-blue-400 transition">
+                            Modifier
+                        </a>
+
+                        <form action="{{ route('films.destroy', ['filmId' => $film['filmId']]) }}" method="POST"
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce film ?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                    class="px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md border border-red-400 transition">
+                                Supprimer
+                            </button>
+                        </form>
+
+                        <a href="{{ route('films.index') }}"
+                           class="px-8 py-3 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-md border border-gray-400 transition">
+                            Retour
+                        </a>
+                    </div>
+
+                @else
+                    <p class="text-center text-gray-300 text-lg">Aucun film trouvé.</p>
                 @endif
-            </div>
 
-            <!-- Section contenu principal -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Colonne gauche - Synopsis -->
-                <div class="md:col-span-2 bg-gray-800 bg-opacity-50 backdrop-blur-md rounded-xl p-6 shadow-lg">
-                    <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Synopsis</h2>
-                    <p class="text-gray-300 leading-relaxed">
-                        {{ $film['description'] ?? 'Aucune description disponible pour ce film.' }}
-                    </p>
-                    
-                    @if(isset($film['specialFeatures']) && $film['specialFeatures'])
-                    <div class="mt-6">
-                        <h3 class="text-xl font-medium text-white mb-2">Caractéristiques spéciales</h3>
-                        <div class="flex flex-wrap gap-2">
-                            @foreach(explode(',', $film['specialFeatures']) as $feature)
-                                <span class="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm">{{ trim($feature) }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-                </div>
-
-                <!-- Colonne droite - Informations de location -->
-                <div class="bg-gray-800 bg-opacity-50 backdrop-blur-md rounded-xl p-6 shadow-lg h-fit">
-                    <h2 class="text-2xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Location</h2>
-                    
-                    <div class="space-y-4">
-                        <!-- Tarif -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-400">Tarif</span>
-                            <span class="text-2xl font-bold text-white">{{ $film['rentalRate'] ?? '-' }} €</span>
-                        </div>
-                        
-                        <!-- Durée -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-400">Durée</span>
-                            <span class="text-white">{{ $film['rentalDuration'] ?? '-' }} jours</span>
-                        </div>
-                        
-                        <!-- Coût de remplacement -->
-                        <div class="flex items-center justify-between">
-                            <span class="text-gray-400">Remplacement</span>
-                            <span class="text-white">{{ $film['replacementCost'] ?? '-' }} €</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="flex justify-center mt-12 mb-8 gap-4">
-                <a href="{{ route('films.edit', ['filmId' => $film['filmId']]) }}" 
-                   class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    Modifier
-                </a>
-                
-                <form action="{{ route('films.destroy', ['filmId' => $film['filmId']]) }}" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg text-white font-medium transition-all focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                        Supprimer
-                    </button>
-                </form>
-                
-                <a href="{{ route('films.index') }}" 
-                   class="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white font-medium transition-all focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                    Retour
-                </a>
             </div>
         </div>
     </div>

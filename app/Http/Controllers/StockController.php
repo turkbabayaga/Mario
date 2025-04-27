@@ -11,61 +11,63 @@ class StockController extends Controller
     {
         $storeId = $request->get('store_id');
 
-        $inventoryResponse = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/all' );
-        if (!$inventoryResponse->ok()) {
-            return view('stocks.index', [
-                'stocks' => [],
-                'error' => 'Erreur API stocks (code ' . $inventoryResponse->status() . ')'
-            ]);
-        }
-        $inventories = $inventoryResponse->json();
+        try {
+            $inventoryResponse = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/inventory/all');
+            $filmResponse = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/film/all');
 
-        $filmsResponse = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/films/all' );
-        if (!$filmsResponse->ok()) {
-            return view('stocks.index', [
-                'stocks' => [],
-                'error' => 'Erreur API films (code ' . $filmsResponse->status() . ')'
-            ]);
-        }
-        $films = collect($filmsResponse->json())->keyBy('filmId');
-
-        $storeList = collect($inventories)
-            ->pluck('storeId')
-            ->unique()
-            ->sort()
-            ->values();
-
-        $grouped = [];
-
-        foreach ($inventories as $item) {
-            $filmId = $item['filmId'] ?? null;
-            $store = $item['storeId'] ?? null;
-
-            if ($filmId === null || $store === null) continue;
-            if ($storeId && $store != $storeId) continue;
-
-            $key = $filmId . '_' . $store;
-
-            if (!isset($grouped[$key])) {
-                $grouped[$key] = [
-                    'film_id' => $filmId,
-                    'store_id' => $store,
-                    'quantity' => 0,
-                    'title' => $films[$filmId]['title'] ?? 'Inconnu',
-                ];
+            if (!$inventoryResponse->ok() || !$filmResponse->ok()) {
+                return view('stocks.index', [
+                    'stocks' => [],
+                    'error' => 'Erreur API',
+                    'storeList' => [],
+                    'selectedStoreId' => $storeId,
+                ]);
             }
 
-            $grouped[$key]['quantity']++;
+            $inventories = $inventoryResponse->json();
+            $films = collect($filmResponse->json())->keyBy('filmId');
+
+            $storeList = collect($inventories)->pluck('storeId')->unique()->sort()->values();
+
+            $grouped = [];
+
+            foreach ($inventories as $item) {
+                $filmId = $item['filmId'] ?? null;
+                $store = $item['storeId'] ?? null;
+
+                if (!$filmId || !$store) continue;
+                if ($storeId && $store != $storeId) continue;
+
+                $key = $filmId . '_' . $store;
+
+                if (!isset($grouped[$key])) {
+                    $grouped[$key] = [
+                        'film_id' => $filmId,
+                        'store_id' => $store,
+                        'quantity' => 0,
+                        'title' => $films[$filmId]['title'] ?? 'Inconnu',
+                    ];
+                }
+
+                $grouped[$key]['quantity']++;
+            }
+
+            $stocks = array_values($grouped);
+
+            return view('stocks.index', [
+                'stocks' => $stocks,
+                'error' => null,
+                'storeList' => $storeList,
+                'selectedStoreId' => $storeId,
+            ]);
+        } catch (\Exception $e) {
+            return view('stocks.index', [
+                'stocks' => [],
+                'error' => 'Erreur API : ' . $e->getMessage(),
+                'storeList' => [],
+                'selectedStoreId' => $storeId,
+            ]);
         }
-
-        $stocks = array_values($grouped);
-
-        return view('stocks.index', [
-            'stocks' => $stocks,
-            'error' => null,
-            'storeList' => $storeList,
-            'selectedStoreId' => $storeId,
-        ]);
     }
 
     public function change(Request $request)
@@ -87,12 +89,12 @@ class StockController extends Controller
         try {
             for ($i = 0; $i < $quantity; $i++) {
                 if ($action === 'add') {
-                    $response = Http::post(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/add' , [
+                    $response = Http::post(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/add', [
                         'filmId' => $filmId,
                         'storeId' => $storeId
                     ]);
                 } else {
-                    $all = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/all' )->json();
+                    $all = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/all')->json();
                     $match = collect($all)
                         ->where('filmId', $filmId)
                         ->where('storeId', $storeId)
@@ -100,7 +102,7 @@ class StockController extends Controller
 
                     if (!$match) break;
 
-                    $response = Http::delete(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/delete' , [
+                    $response = Http::delete(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/delete', [
                         'id' => $match['inventoryId']
                     ]);
                 }
@@ -110,7 +112,7 @@ class StockController extends Controller
                 }
             }
 
-            return redirect()->route('stocks.index')->with('success', "$successCount exemplaire(s) ".($action === 'add' ? "ajouté(s)" : "supprimé(s)")." avec succès.");
+            return redirect()->route('stocks.index')->with('success', "$successCount exemplaire(s) " . ($action === 'add' ? "ajouté(s)" : "supprimé(s)") . " avec succès.");
         } catch (\Exception $e) {
             return redirect()->route('stocks.index')->with('error', 'Erreur API : ' . $e->getMessage());
         }
