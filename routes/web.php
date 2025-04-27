@@ -38,3 +38,4 @@ Route::middleware(['web', \App\Http\Middleware\IsStaffAuthenticated::class])->gr
         Route::post('/change', [StockController::class, 'change'])->name('change');
     });
 });
+

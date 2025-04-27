@@ -34,9 +34,11 @@ class StockController extends Controller
             foreach ($inventories as $item) {
                 $filmId = $item['filmId'] ?? null;
                 $store = $item['storeId'] ?? null;
+                $existe = $item['existe'] ?? null;
 
                 if (!$filmId || !$store) continue;
                 if ($storeId && $store != $storeId) continue;
+                if ($existe === false) continue; // Sauter les DVD supprimés
 
                 $key = $filmId . '_' . $store;
 
@@ -89,22 +91,28 @@ class StockController extends Controller
         try {
             for ($i = 0; $i < $quantity; $i++) {
                 if ($action === 'add') {
-                    $response = Http::post(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/add', [
-                        'filmId' => $filmId,
-                        'storeId' => $storeId
+                    $now = now()->format('Y-m-d H:i:s');
+                    $response = Http::asForm()->post(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/inventory/add', [
+                        'film_id' => $filmId,
+                        'store_id' => $storeId,
+                        'last_update' => $now,
                     ]);
                 } else {
-                    $all = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/all')->json();
-                    $match = collect($all)
-                        ->where('filmId', $filmId)
-                        ->where('storeId', $storeId)
+                    $inventories = Http::get(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/inventory/all')->json();
+
+                    $match = collect($inventories)
+                        ->filter(function ($item) use ($filmId, $storeId) {
+                            return ($item['filmId'] ?? null) == $filmId
+                                && ($item['storeId'] ?? null) == $storeId
+                                && (($item['existe'] ?? null) === true || ($item['existe'] ?? null) === null);
+                        })
                         ->first();
 
-                    if (!$match) break;
+                    if (!$match) {
+                        break;
+                    }
 
-                    $response = Http::delete(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/stock/delete', [
-                        'id' => $match['inventoryId']
-                    ]);
+                    $response = Http::delete(env('TOAD_SERVER') . ':' . env('TOAD_PORT') . '/toad/inventory/delete/' . $match['inventoryId']);
                 }
 
                 if ($response->successful()) {
