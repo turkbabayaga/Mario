@@ -1,140 +1,176 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight text-center">
+        <h2 class="font-extrabold text-3xl text-center text-white uppercase tracking-wide">
             {{ __('Ajouter un film') }}
         </h2>
     </x-slot>
 
     <div class="py-12 flex justify-center">
-        <div class="max-w-2xl w-full bg-white dark:bg-gray-800 shadow-xl rounded-lg p-8">
+        <div class="max-w-2xl w-full bg-gray-800 bg-opacity-60 backdrop-blur-md rounded-2xl shadow-2xl p-8">
 
-            <!-- Affichage des messages -->
+            {{-- Alerts --}}
             @if(session('success'))
-                <div class="mb-4 text-green-700 bg-green-100 border border-green-400 rounded-lg p-4 text-center">
+                <div class="mb-4 px-4 py-2 bg-green-700 bg-opacity-50 text-green-200 rounded-lg border border-green-600">
                     {{ session('success') }}
                 </div>
             @endif
-
             @if(session('error'))
-                <div class="mb-4 text-red-700 bg-red-100 border border-red-400 rounded-lg p-4 text-center">
+                <div class="mb-4 px-4 py-2 bg-red-700 bg-opacity-50 text-red-200 rounded-lg border border-red-600">
                     {{ session('error') }}
                 </div>
             @endif
-
-            @if ($errors->any())
-                <div class="mb-4 text-red-700 bg-red-100 border border-red-400 rounded-lg p-4">
-                    <ul class="list-disc pl-5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
+            @if($errors->any())
+                <div class="mb-4 px-4 py-2 bg-red-700 bg-opacity-30 text-red-200 rounded-lg border border-red-600">
+                    <ul class="list-disc list-inside">
+                        @foreach($errors->all() as $e)
+                            <li>{{ $e }}</li>
                         @endforeach
                     </ul>
                 </div>
             @endif
 
-            <form action="{{ route('films.store') }}" method="POST">
+            <form action="{{ route('films.store') }}" method="POST" class="space-y-6">
                 @csrf
 
-                <!-- Titre -->
-                <div class="mb-4">
-                    <label for="title" class="block text-gray-700 dark:text-gray-300 font-medium">Titre</label>
+                {{-- Titre --}}
+                <div>
+                    <label for="title" class="block text-gray-200 mb-1">
+                        <i class="bx bx-heading mr-1 text-indigo-400"></i>
+                        Titre
+                    </label>
                     <input type="text" name="title" id="title" value="{{ old('title') }}"
-                        class="w-3/4 mx-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
-                        required>
+                           class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                           required>
                 </div>
 
-                <!-- Description -->
-                <div class="mb-4">
-                    <label for="description" class="block text-gray-700 dark:text-gray-300 font-medium">Description</label>
-                    <textarea name="description" id="description"
-                        class="w-3/4 mx-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
-                        required>{{ old('description') }}</textarea>
+                {{-- Description --}}
+                <div>
+                    <label for="description" class="block text-gray-200 mb-1">
+                        <i class="bx bx-comment-detail mr-1 text-indigo-400"></i>
+                        Description
+                    </label>
+                    <textarea name="description" id="description" rows="4"
+                              class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                              required>{{ old('description') }}</textarea>
                 </div>
 
-                <!-- Année de sortie -->
-                <div class="mb-4">
-                    <label for="release_year" class="block text-gray-700 dark:text-gray-300 font-medium">Année de sortie</label>
-                    <input type="number" name="release_year" id="release_year" value="{{ old('release_year') }}"
-                        class="w-1/2 mx-auto px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
-                        required>
-                </div>
-
-                <!-- ID Langue et ID Langue d'origine -->
-                <div class="grid grid-cols-2 gap-4 mb-4 max-w-lg mx-auto">
+                {{-- Ligne 1 : année & langues --}}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="language_id" class="block text-gray-700 dark:text-gray-300 font-medium">ID Langue</label>
+                        <label for="release_year" class="block text-gray-200 mb-1">
+                            <i class="bx bx-calendar-alt mr-1 text-indigo-400"></i>
+                            Année de sortie
+                        </label>
+                        <input type="number" name="release_year" id="release_year" value="{{ old('release_year') }}"
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                               required>
+                    </div>
+                    <div>
+                        <label for="language_id" class="block text-gray-200 mb-1">
+                            <i class="bx bx-globe mr-1 text-indigo-400"></i>
+                            ID Langue
+                        </label>
                         <input type="number" name="language_id" id="language_id" value="{{ old('language_id') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
-                            required>
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                               required>
                     </div>
                     <div>
-                        <label for="original_language_id" class="block text-gray-700 dark:text-gray-300 font-medium">ID Langue d'origine</label>
+                        <label for="original_language_id" class="block text-gray-200 mb-1">
+                            <i class="bx bx-world mr-1 text-indigo-400"></i>
+                            Langue d’origine
+                        </label>
                         <input type="number" name="original_language_id" id="original_language_id" value="{{ old('original_language_id') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
 
-                <!-- Durée et taux de location -->
-                <div class="grid grid-cols-2 gap-4 mb-4 max-w-lg mx-auto">
+                {{-- Ligne 2 : locations & tarifs --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="rental_duration" class="block text-gray-700 dark:text-gray-300 font-medium">Durée de location</label>
+                        <label for="rental_duration" class="block text-gray-200 mb-1">
+                            <i class="bx bx-timer mr-1 text-indigo-400"></i>
+                            Durée location (j)
+                        </label>
                         <input type="number" name="rental_duration" id="rental_duration" value="{{ old('rental_duration', 3) }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label for="rental_rate" class="block text-gray-700 dark:text-gray-300 font-medium">Taux de location</label>
-                        <input type="number" step="0.01" name="rental_rate" id="rental_rate" value="{{ old('rental_rate') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                        <label for="rental_rate" class="block text-gray-200 mb-1">
+                            <i class="bx bx-euro mr-1 text-indigo-400"></i>
+                            Tarif location (€)
+                        </label>
+                        <input type="number" name="rental_rate" id="rental_rate" step="0.01" value="{{ old('rental_rate') }}"
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
 
-                <!-- Longueur et coût de remplacement -->
-                <div class="grid grid-cols-2 gap-4 mb-4 max-w-lg mx-auto">
+                {{-- Ligne 3 : durée & remplacement --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="length" class="block text-gray-700 dark:text-gray-300 font-medium">Longueur (en minutes)</label>
+                        <label for="length" class="block text-gray-200 mb-1">
+                            <i class="bx bx-time-five mr-1 text-indigo-400"></i>
+                            Longueur (min)
+                        </label>
                         <input type="number" name="length" id="length" value="{{ old('length') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label for="replacement_cost" class="block text-gray-700 dark:text-gray-300 font-medium">Coût de remplacement</label>
-                        <input type="number" step="0.01" name="replacement_cost" id="replacement_cost" value="{{ old('replacement_cost') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                        <label for="replacement_cost" class="block text-gray-200 mb-1">
+                            <i class="bx bx-money mr-1 text-indigo-400"></i>
+                            Coût remplacement (€)
+                        </label>
+                        <input type="number" name="replacement_cost" id="replacement_cost" step="0.01" value="{{ old('replacement_cost') }}"
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
 
-                <!-- Évaluation et caractéristiques spéciales -->
-                <div class="grid grid-cols-2 gap-4 mb-4 max-w-lg mx-auto">
+                {{-- Ligne 4 : évaluation & fonctionnalités --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="rating" class="block text-gray-700 dark:text-gray-300 font-medium">Évaluation</label>
+                        <label for="rating" class="block text-gray-200 mb-1">
+                            <i class="bx bxs-star mr-1 text-indigo-400"></i>
+                            Évaluation
+                        </label>
                         <input type="text" name="rating" id="rating" value="{{ old('rating') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
-                        <label for="special_features" class="block text-gray-700 dark:text-gray-300 font-medium">Caractéristiques spéciales</label>
+                        <label for="special_features" class="block text-gray-200 mb-1">
+                            <i class="bx bx-purchase-tag mr-1 text-indigo-400"></i>
+                            Caractéristiques spéciales
+                        </label>
                         <input type="text" name="special_features" id="special_features" value="{{ old('special_features') }}"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
                     </div>
                 </div>
 
-                <!-- ID du réalisateur -->
-                <div class="mb-6 max-w-lg mx-auto">
-                    <label for="id_director" class="block text-gray-700 dark:text-gray-300 font-medium">ID du réalisateur</label>
-                    <input type="number" name="id_director" id="id_director" value="{{ old('id_director') }}"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500">
+                {{-- Ligne 5 : réalisateur & mise à jour --}}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="id_director" class="block text-gray-200 mb-1">
+                            <i class="bx bx-user-check mr-1 text-indigo-400"></i>
+                            ID Réalisateur
+                        </label>
+                        <input type="number" name="id_director" id="id_director" value="{{ old('id_director') }}"
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="last_update" class="block text-gray-200 mb-1">
+                            <i class="bx bx-time-five mr-1 text-indigo-400"></i>
+                            Dernière mise à jour
+                        </label>
+                        <input type="datetime-local" name="last_update" id="last_update"
+                               value="{{ old('last_update', now()->format('Y-m-d\TH:i')) }}"
+                               class="w-full px-4 py-2 rounded-lg border border-gray-600 bg-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500"
+                               required>
+                    </div>
                 </div>
 
-                <!-- Date de dernière mise à jour -->
-                <div class="mb-6 max-w-lg mx-auto">
-                    <label for="last_update" class="block text-gray-700 dark:text-gray-300 font-medium">Date de dernière mise à jour</label>
-                    <input type="datetime-local" name="last_update" id="last_update"
-                        value="{{ old('last_update', now()->format('Y-m-d\TH:i')) }}"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500"
-                        required>
-                </div>
-
-                <!-- Bouton d'ajout -->
+                {{-- Bouton --}}
                 <div class="flex justify-center">
                     <button type="submit"
-                        class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-green-600 transform hover:scale-105 transition-all duration-300">
+                            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition">
+                        <i class="bx bx-plus text-xl"></i>
                         Ajouter le film
                     </button>
                 </div>
