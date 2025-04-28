@@ -1,29 +1,34 @@
+# Laravel standard
 /vendor
 /node_modules
 /public/storage
 /storage/*.key
 /storage/app/public
-/storage/framework/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
 /storage/logs/*
-/*.log
+/.env.*
+!.env
 .phpunit.result.cache
-/.vscode
-.idea
-/.phpunit.cache
-/public/build
+.phpunit.cache
 /public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-.env.production
-.phpactor.json
-.phpunit.result.cache
+/public/build
 Homestead.json
 Homestead.yaml
-auth.json
+
+# IDEs & DevTools
+/.vscode
+/.idea
+/.phpactor.json
+/.fleet
+/.zed
+
+# Log and debug files
+*.log
 npm-debug.log
 yarn-error.log
-/.fleet
-/.idea
-/.vscode
-/.zed
+
+# Misc
+auth.json
