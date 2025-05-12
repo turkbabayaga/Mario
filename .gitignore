@@ -9,7 +9,8 @@
 /storage/framework/testing/*
 /storage/framework/views/*
 /storage/logs/*
-/.env.*
+/.env
+/vite.config.js
 !.env
 .phpunit.result.cache
 .phpunit.cache
