@@ -11,7 +11,6 @@
 /storage/logs/*
 /.env
 /vite.config.js
-!.env
 .phpunit.result.cache
 .phpunit.cache
 /public/hot
